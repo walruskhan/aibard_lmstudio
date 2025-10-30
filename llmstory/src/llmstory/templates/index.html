@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Home - LLM Story{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">Welcome to LLM Story</h1>
+        <p class="hero-subtitle">Your Flask application is now serving files from disk!</p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('website.about') }}" class="btn btn-primary">Learn More</a>
+            <a href="{{ url_for('website.contact') }}" class="btn btn-secondary">Get in Touch</a>
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="container">
+        <h2>Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>Template Engine</h3>
+                <p>Using Jinja2 templates for dynamic HTML generation</p>
+            </div>
+            <div class="feature-card">
+                <h3>Static Files</h3>
+                <p>CSS, JavaScript, and images served from static directory</p>
+            </div>
+            <div class="feature-card">
+                <h3>Responsive Design</h3>
+                <p>Mobile-friendly layout that works on all devices</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

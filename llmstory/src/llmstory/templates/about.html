@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}About - LLM Story{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>About LLM Story</h1>
+        <p class="lead">Learn more about our Flask application</p>
+    </div>
+</div>
+
+<div class="content-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <h2>What is LLM Story?</h2>
+                <p>LLM Story is a Flask web application that demonstrates modern web development practices using Python. It showcases how to structure a Flask application with proper template inheritance, static file serving, and responsive design.</p>
+                
+                <h3>Key Features</h3>
+                <ul>
+                    <li>Template-based HTML rendering using Jinja2</li>
+                    <li>Static file serving for CSS, JavaScript, and images</li>
+                    <li>Responsive design with modern CSS</li>
+                    <li>Modular project structure</li>
+                    <li>Development server with auto-reload</li>
+                </ul>
+
+                <h3>Technology Stack</h3>
+                <ul>
+                    <li><strong>Backend:</strong> Flask (Python)</li>
+                    <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript</li>
+                    <li><strong>Package Management:</strong> UV</li>
+                    <li><strong>Template Engine:</strong> Jinja2</li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <div class="sidebar">
+                    <h4>Quick Links</h4>
+                    <ul class="sidebar-links">
+                        <li><a href="{{ url_for('website.home') }}">Home</a></li>
+                        <li><a href="{{ url_for('website.contact') }}">Contact</a></li>
+                        <li><a href="https://flask.palletsprojects.com/" target="_blank">Flask Documentation</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

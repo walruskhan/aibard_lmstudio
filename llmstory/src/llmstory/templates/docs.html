@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation - LLM Story{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>API Documentation</h1>
+        <p class="lead">Learn how to use the LLM Story API</p>
+    </div>
+</div>
+
+<div class="content-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <h2>API Endpoints</h2>
+                
+                <div class="api-section">
+                    <h3>Health Check</h3>
+                    <div class="endpoint">
+                        <code class="method">GET</code>
+                        <code class="url">/api/health</code>
+                    </div>
+                    <p>Check if the API is running and healthy.</p>
+                    
+                    <h4>Response</h4>
+                    <pre><code>{
+  "status": "healthy",
+  "timestamp": "2025-10-30T12:00:00Z",
+  "service": "LLM Story API"
+}</code></pre>
+                </div>
+
+                <div class="api-section">
+                    <h3>Version Information</h3>
+                    <div class="endpoint">
+                        <code class="method">GET</code>
+                        <code class="url">/api/version</code>
+                    </div>
+                    <p>Get API version and information.</p>
+                </div>
+
+                <div class="api-section">
+                    <h3>Contact Form</h3>
+                    <div class="endpoint">
+                        <code class="method">POST</code>
+                        <code class="url">/api/contact</code>
+                    </div>
+                    <p>Submit a contact form message.</p>
+                    
+                    <h4>Request Body</h4>
+                    <pre><code>{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "subject": "Hello",
+  "message": "Your message here"
+}</code></pre>
+                </div>
+
+                <div class="api-section">
+                    <h3>Stories</h3>
+                    <div class="endpoint">
+                        <code class="method">GET</code>
+                        <code class="url">/api/stories</code>
+                    </div>
+                    <p>Get list of all stories.</p>
+                    
+                    <div class="endpoint">
+                        <code class="method">POST</code>
+                        <code class="url">/api/stories</code>
+                    </div>
+                    <p>Create a new story.</p>
+                    
+                    <div class="endpoint">
+                        <code class="method">GET</code>
+                        <code class="url">/api/stories/{id}</code>
+                    </div>
+                    <p>Get a specific story by ID.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="sidebar">
+                    <h4>Quick Test</h4>
+                    <p>Try these endpoints:</p>
+                    <ul class="sidebar-links">
+                        <li><a href="/api/health" target="_blank">Health Check</a></li>
+                        <li><a href="/api/version" target="_blank">Version Info</a></li>
+                        <li><a href="/api/stories" target="_blank">Stories List</a></li>
+                    </ul>
+                    
+                    <h4>Tools</h4>
+                    <p>Test the API with tools like:</p>
+                    <ul>
+                        <li>curl</li>
+                        <li>Postman</li>
+                        <li>Browser DevTools</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.api-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.endpoint {
+    background-color: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+    font-family: 'Courier New', monospace;
+}
+
+.method {
+    background-color: #28a745;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    margin-right: 0.5rem;
+    font-weight: bold;
+}
+
+.url {
+    color: #495057;
+}
+
+pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}

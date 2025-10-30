@@ -1,0 +1,47 @@
+# Python-generated files
+llmstory/__pycache__/
+llmstory/*.py[oc]
+llmstory/build/
+llmstory/dist/
+llmstory/wheels/
+*.egg-info
+
+# Virtual environments
+llmstory/.venv
+
+# Frontend
+# dependencies (bun install)
+frontend/node_modules
+
+# output
+frontend/out
+frontend/dist
+frontend/*.tgz
+
+# code coverage
+frontend/coverage
+frontend/*.lcov
+
+# logs
+frontend/logs
+frontend/_.log
+frontend/report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# dotenv environment variable files
+frontend/.env
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/.env.local
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# IntelliJ based IDEs
+frontend/.idea
+
+# Finder (MacOS) folder config
+.DS_Store
+
