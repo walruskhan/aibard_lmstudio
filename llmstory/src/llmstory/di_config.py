@@ -2,7 +2,7 @@
 Dependency injection configuration for the application.
 """
 from injector import Module, provider, singleton
-from .services import StoryService, ContactService, HealthService
+from .services import ConfigService
 
 
 class ServiceModule(Module):
@@ -10,21 +10,9 @@ class ServiceModule(Module):
     
     @provider
     @singleton
-    def provide_story_service(self) -> StoryService:
-        """Provide StoryService instance."""
-        return StoryService()
-    
-    @provider
-    @singleton
-    def provide_contact_service(self) -> ContactService:
-        """Provide ContactService instance."""
-        return ContactService()
-    
-    @provider
-    @singleton
-    def provide_health_service(self) -> HealthService:
-        """Provide HealthService instance."""
-        return HealthService()
+    def provide_config_service(self) -> ConfigService:
+        """Provide ConfigService instance (loaded first)."""
+        return ConfigService()
 
 
 # You can add more modules here for different layers

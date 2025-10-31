@@ -10,9 +10,9 @@ default:
 
 # Start Flask development server only
 flask:
-    @echo "🚀 Starting Flask development server..."
-    @echo "Server will be available at: http://localhost:5000"
-    cd llmstory && uv run python -c "from llmstory import app; app.run(debug=True, host='0.0.0.0', port=5000)"
+    @echo "🚀 Starting Flask development server with configuration..."
+    @echo "Server settings loaded from .env file"
+    cd llmstory && uv run python -c "from llmstory import main; main()"
 
 # Start Bun development server only  
 bun:
@@ -30,7 +30,7 @@ dev:
     @echo "   Each server will open in its own window"
     @echo "   Close the windows or press Ctrl+C to stop servers"
     @echo ""
-    @Start-Process pwsh -ArgumentList "-NoExit", "-Command", "Set-Location '{{justfile_directory()}}\llmstory'; Write-Host '🚀 Flask Server Starting...'; uv run python -c \"from llmstory import app; app.run(debug=True, host='0.0.0.0', port=5000)\""
+    @Start-Process pwsh -ArgumentList "-NoExit", "-Command", "Set-Location '{{justfile_directory()}}\llmstory'; Write-Host '🚀 Flask Server Starting with .env config...'; uv run python -c \"from llmstory import main; main()\""
     @Start-Process pwsh -ArgumentList "-NoExit", "-Command", "Set-Location '{{justfile_directory()}}\frontend'; Write-Host '🚀 Bun Server Starting...'; bun run dev"
     @echo "✅ Both servers launched in separate windows!"
 

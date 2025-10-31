@@ -2,8 +2,6 @@
 Services package for dependency injection.
 Contains all business logic services.
 """
-from .story_service import StoryService
-from .contact_service import ContactService
-from .health_service import HealthService
+from .config_service import ConfigService
 
-__all__ = ['StoryService', 'ContactService', 'HealthService']
+__all__ = ['ConfigService']
