@@ -9,3 +9,18 @@ Accept: application/json
 ### Unload Model
 DELETE http://127.0.0.1:5000/api/models/crumb_-_nano-mistral
 Accept: application/json
+
+### Create Session
+PUT http://127.0.0.1:5000/api/session/debug/create_session
+Accept: application/json
+Content-Type: application/json
+
+> {%
+var body = response.body ? JSON.parse(response.body) : {};
+client.global.set("session_id", body.session_id || body.sessionId || body.id);
+%}
+
+### Set session model
+PUT http://127.0.0.1:5000/api/session/models/crumb_-_nano-mistral
+Accept: application/json
+Cookie: session_id={{session_id}}

@@ -8,6 +8,8 @@ from typing import Sequence
 from flask import Blueprint, jsonify, request, current_app
 import humanize
 import lmstudio as lms
+import uuid
+from flask import make_response
 
 # Create a blueprint for API routes
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -51,7 +53,26 @@ def load_model(model_key: str):
             "key": model_key,
             "loaded": True
         })
+    
+def require_session_key(inner):
+    def wrapper(*args, **kwargs):
+        session_id = request.cookies.get('session_id')
+        if not session_id and session_id is not str:
+            return jsonify({"error": "Session ID required"}), 401
+        return inner(*args, **kwargs)
+    return wrapper
 
+@api_bp.route("/session/models/<string:model_key>", methods=['PUT'])
+@require_session_key
+def use_model(model_key: str):
+    return "YAY!"
+
+@api_bp.route("/session/debug/create_session", methods=['PUT'])
+def create_session_debug():
+    session_id = str(uuid.uuid4())
+    response = make_response(jsonify({"session_id": session_id, "created": True}))
+    response.set_cookie('session_id', session_id, httponly=True, secure=False)
+    return response
 
 @dataclass
 class ModelInfo:
