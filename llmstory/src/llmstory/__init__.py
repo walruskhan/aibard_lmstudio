@@ -1,9 +1,12 @@
 import os
 from flask import Flask
+from flask_injector import FlaskInjector
+from injector import Injector
 from .routes import website_bp, api_bp
+from .di_config import ServiceModule, RepositoryModule, ConfigModule
 
 def create_app():
-    """Application factory function"""
+    """Application factory function with dependency injection"""
     # Get the directory where this file is located
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
@@ -19,6 +22,19 @@ def create_app():
     # Register blueprints
     app.register_blueprint(website_bp)
     app.register_blueprint(api_bp)
+    
+    # Set up dependency injection
+    injector = Injector([
+        ServiceModule,
+        RepositoryModule,
+        ConfigModule
+    ])
+    
+    # Configure Flask-Injector
+    FlaskInjector(app=app, injector=injector)
+    
+    print("✅ Dependency injection configured successfully!")
+    print("📦 Available services: StoryService, ContactService, HealthService")
     
     return app
 
