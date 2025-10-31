@@ -1,22 +1,13 @@
 import os
 from flask import Flask
-from flask_injector import FlaskInjector
-from injector import Injector
+from dotenv import load_dotenv
 from .routes import website_bp, api_bp
-from .di_config import ServiceModule, RepositoryModule, ConfigModule
-from .services import ConfigService
 
 def create_app():
-    """Application factory function with dependency injection and configuration"""
-    # Create injector first to get config service
-    injector = Injector([
-        ServiceModule,
-        RepositoryModule,
-        ConfigModule
-    ])
-    
-    # Get configuration service
-    config_service = injector.get(ConfigService)
+    """Application factory function with configuration"""
+
+    # Load environment variables from .env file
+    load_dotenv()
     
     # Get the directory where this file is located
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,23 +17,30 @@ def create_app():
                template_folder=os.path.join(current_dir, 'templates'),
                static_folder=os.path.join(current_dir, 'static'))
     
-    # Configure the app using config service
-    app.config.update(config_service.get_flask_config())
-    
-    # Additional Flask configuration
-    app.config['CONFIG_SERVICE'] = config_service
-    
+    # Load all environment variables into Flask's config
+    for key, value in os.environ.items():
+        # Convert string booleans to actual booleans
+        if value.lower() in ('true', 'false'):
+            value = value.lower() == 'true'
+        # Convert numeric strings to integers where appropriate
+        elif value.isdigit():
+            value = int(value)
+        app.config[key] = value
+
+    # # Add debugger attachment in development
+    # if app.config.get('FLASK_DEBUG'):
+    #     try:
+    #         import debugpy
+    #         debugpy.listen(5678)
+    #         print("Debugger listening on port 5678")
+    #     except ImportError:
+    #         pass  # debugpy not installed
+        
     # Register blueprints
     app.register_blueprint(website_bp)
     app.register_blueprint(api_bp)
+
     
-    # Configure Flask-Injector
-    FlaskInjector(app=app, injector=injector)
-    
-    print("✅ Dependency injection configured successfully!")
-    print(f"📦 Available services: ConfigService")
-    print(f"🌍 Environment: {config_service.environment}")
-    print(f"🐛 Debug mode: {config_service.debug}")
     
     return app
 
@@ -50,16 +48,14 @@ def create_app():
 app = create_app()
 
 def main() -> None:
-    """Main function that starts the Flask application with configuration."""
-    config_service = app.config['CONFIG_SERVICE']
-    
+    """Main function that starts the Flask application with configuration."""    
     print("🚀 Starting LLM Story Flask application...")
-    print(f"🌍 Environment: {config_service.environment}")
-    print(f"🔧 Host: {config_service.flask_host}:{config_service.flask_port}")
-    print(f"🐛 Debug: {config_service.debug}")
-    
+    print(f"🌍 Environment: {app.config.get('ENVIRONMENT', 'development')}")
+    print(f"🔧 Host: {app.config.get('FLASK_HOST', '0.0.0.0')}:{app.config.get('FLASK_PORT', 5000)}")
+    print(f"🐛 Debug: {app.config.get('DEBUG', True)}")
+
     app.run(
-        debug=config_service.debug,
-        host=config_service.flask_host,
-        port=config_service.flask_port
+        debug=app.config.get('DEBUG', True),
+        host=app.config.get('FLASK_HOST', '0.0.0.0'),
+        port=app.config.get('FLASK_PORT', 5000)
     )

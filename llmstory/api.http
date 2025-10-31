@@ -1,0 +1,11 @@
+### Get Status
+GET http://127.0.0.1:5000/api/status
+Accept: application/json
+
+### Load Model
+PUT http://127.0.0.1:5000/api/models/crumb_-_nano-mistral
+Accept: application/json
+
+### Unload Model
+DELETE http://127.0.0.1:5000/api/models/crumb_-_nano-mistral
+Accept: application/json

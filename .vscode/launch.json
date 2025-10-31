@@ -1,0 +1,55 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Flask",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "llmstory",
+                "FLASK_DEBUG": "1"
+            },
+            "args": [
+                "run"
+            ],
+            "jinja": true
+        },
+        {
+            "name": "Flask: LLM API",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "llmstory",
+                "FLASK_ENV": "development",
+                "FLASK_DEBUG": "1" // Don't use DEBUG, it disables vscode terminal
+            },
+            "args": [
+                "run",
+                "--host=127.0.0.1",
+                "--port=5000",
+                // "--debug"
+            ],
+            "jinja": true,
+            "cwd": "${workspaceFolder}/llmstory/src/",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/llmstory/.venv/Scripts/python.exe"
+        },
+        {
+            "name": "Attach to Flask",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "127.0.0.1",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "."
+                }
+            ]
+        }
+    ]
+}
