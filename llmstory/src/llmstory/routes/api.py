@@ -10,6 +10,7 @@ import humanize
 import lmstudio as lms
 import uuid
 from flask import make_response
+from ..session import get_or_create_session
 
 # Create a blueprint for API routes
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -59,13 +60,20 @@ def require_session_key(inner):
         session_id = request.cookies.get('session_id')
         if not session_id and session_id is not str:
             return jsonify({"error": "Session ID required"}), 401
+        kwargs['session_id'] = session_id
         return inner(*args, **kwargs)
     return wrapper
 
 @api_bp.route("/session/models/<string:model_key>", methods=['PUT'])
 @require_session_key
-def use_model(model_key: str):
-    return "YAY!"
+def use_model(model_key: str, session_id: str):
+    session = get_or_create_session(session_id)
+    session.model_key = model_key
+
+    return jsonify({
+        "session_id": session_id,
+        "model_key": model_key
+    })
 
 @api_bp.route("/session/debug/create_session", methods=['PUT'])
 def create_session_debug():

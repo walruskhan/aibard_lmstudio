@@ -1,7 +1,10 @@
 import os
 from flask import Flask
 from dotenv import load_dotenv
+from flask_socketio import SocketIO
 from .routes import website_bp, api_bp
+
+socketio = SocketIO()
 
 def create_app():
     """Application factory function with configuration"""
@@ -16,6 +19,7 @@ def create_app():
     app = Flask(__name__, 
                template_folder=os.path.join(current_dir, 'templates'),
                static_folder=os.path.join(current_dir, 'static'))
+
     
     # Load all environment variables into Flask's config
     for key, value in os.environ.items():
@@ -26,6 +30,9 @@ def create_app():
         elif value.isdigit():
             value = int(value)
         app.config[key] = value
+
+    app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+
 
     # # Add debugger attachment in development
     # if app.config.get('FLASK_DEBUG'):
@@ -39,6 +46,8 @@ def create_app():
     # Register blueprints
     app.register_blueprint(website_bp)
     app.register_blueprint(api_bp)
+
+    socketio.init_app(app, cors_allowed_origins="*", async_mode='threading')
 
     
     
