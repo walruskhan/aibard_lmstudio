@@ -1,26 +1,44 @@
+@hostname = 127.0.0.1:5000
+
 ### Get Status
-GET http://127.0.0.1:5000/api/status
+GET http://{{hostname}}/api/status
 Accept: application/json
 
 ### Load Model
-PUT http://127.0.0.1:5000/api/models/crumb_-_nano-mistral
-Accept: application/json
-
-### Unload Model
-DELETE http://127.0.0.1:5000/api/models/crumb_-_nano-mistral
-Accept: application/json
-
-### Create Session
-PUT http://127.0.0.1:5000/api/session/debug/create_session
+PUT http://{{hostname}}/api/models
 Accept: application/json
 Content-Type: application/json
 
-> {%
-var body = response.body ? JSON.parse(response.body) : {};
-client.global.set("session_id", body.session_id || body.sessionId || body.id);
-%}
+{
+    "model_key": "crumb_-_nano-mistral"
+}
+
+### Unload Model
+DELETE http://{{hostname}}/api/models
+Accept: application/json
+Content-Type: application/json
+
+{
+    "model_key": "crumb_-_nano-mistral"
+}
+
+### Create Session
+# @name create_debug_session
+POST http://{{hostname}}/api/session/debug
+Accept: application/json
+Content-Type: application/json
 
 ### Set session model
-PUT http://127.0.0.1:5000/api/session/models/crumb_-_nano-mistral
+PUT http://{{hostname}}/api/session/{{create_debug_session.response.body.session_id}}/models
 Accept: application/json
-Cookie: session_id={{session_id}}
+Content-Type: application/json
+
+{
+    "model_key": "crumb_-_nano-mistral"
+}
+
+
+### Request SSE
+GET http://{{hostname}}/api/session/{{create_debug_session.response.body.session_id}}/chat/stream
+Accept: application/json
+

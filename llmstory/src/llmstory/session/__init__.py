@@ -15,3 +15,9 @@ def get_or_create_session(session_id: str):
         return session
 
     return sessions[session_id]
+
+def get_session(session_id: str):
+    if session_id not in sessions.keys():
+        raise f"session='{session_id}' does not exist"
+    
+    return sessions[session_id]

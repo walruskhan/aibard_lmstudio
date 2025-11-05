@@ -5,12 +5,13 @@ Handles all API endpoints for data exchange.
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Sequence
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, Response, json, jsonify, request, current_app
 import humanize
 import lmstudio as lms
 import uuid
 from flask import make_response
-from ..session import get_or_create_session
+from ..session import get_or_create_session, get_session
+import time
 
 # Create a blueprint for API routes
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -28,8 +29,11 @@ def valid_lm_client():
         yield client
         
 
-@api_bp.route("/models/<string:model_key>", methods=['DELETE'])
+@api_bp.route("/models/", methods=['DELETE'])
 def unload_model(model_key: str):
+    data = request.get_json()
+    model_key = data['model_key']
+
     with valid_lm_client() as client:
         llms = [(m, ModelInfo(m).key) for m in lms.list_loaded_models("llm")]
         model_to_unload = next((m for m, key in llms if model_key == key), None)
@@ -39,8 +43,11 @@ def unload_model(model_key: str):
         model_to_unload.unload()
         return jsonify({"message": f"Model {model_key} unloaded successfully"})
 
-@api_bp.route("/models/<string:model_key>", methods=['PUT'])
+@api_bp.route("/models/", methods=['PUT'])
 def load_model(model_key: str):
+    data = request.get_json()
+    model_key = data['model_key']
+
     with valid_lm_client() as client:
         model = lms.llm(model_key)
         if model is None:
@@ -57,17 +64,20 @@ def load_model(model_key: str):
     
 def require_session_key(inner):
     def wrapper(*args, **kwargs):
-        session_id = request.cookies.get('session_id')
+        session_id = request.cookies.get('session_id') or request.args.get('session_id')
         if not session_id and session_id is not str:
             return jsonify({"error": "Session ID required"}), 401
         kwargs['session_id'] = session_id
         return inner(*args, **kwargs)
     return wrapper
 
-@api_bp.route("/session/models/<string:model_key>", methods=['PUT'])
-@require_session_key
-def use_model(model_key: str, session_id: str):
+@api_bp.route("/session/<string:session_id>/models", methods=['PUT'])
+def use_model(session_id: str):
     session = get_or_create_session(session_id)
+
+    data = request.get_json()
+    model_key = data['model_key']
+
     session.model_key = model_key
 
     return jsonify({
@@ -75,12 +85,47 @@ def use_model(model_key: str, session_id: str):
         "model_key": model_key
     })
 
-@api_bp.route("/session/debug/create_session", methods=['PUT'])
+@api_bp.route("/session/debug", methods=['POST'])
 def create_session_debug():
     session_id = str(uuid.uuid4())
     response = make_response(jsonify({"session_id": session_id, "created": True}))
     response.set_cookie('session_id', session_id, httponly=True, secure=False)
     return response
+
+
+@api_bp.route("/session/<string:session_id>/chat/stream", methods=['GET'])
+def stream_chat(session_id: str):
+    def generate_sse_message():
+        try:
+            # session = get_session(session_id)
+
+            for i in range(1, 10):
+                yield json.dumps({
+                    "data": {
+                        "event": "response",
+                        "text": f"Message = {i}"
+                    }
+                })
+                time.sleep(1)
+        except:
+            yield json.dumps({
+                "data": {
+                    "error": "SESSION_NOT_EXIST",
+                    "message": f"Session {session_id} does not exist"
+                }
+            })
+            return
+    
+    return Response(generate_sse_message(),
+                    mimetype='text/event-stream',
+                    headers={
+                        'Cache-Control': 'no-cache',
+                        'Connection': 'keep-alive',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'POST'
+                    })
+
 
 @dataclass
 class ModelInfo:
