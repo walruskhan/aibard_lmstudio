@@ -1,6 +1,7 @@
 from .LLMSession import LLMSession
+from typing import Dict
 
-sessions = dict()
+sessions: Dict[str, LLMSession] = {}
 
 def unload_session(session_id: str):
     pass

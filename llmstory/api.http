@@ -37,8 +37,20 @@ Content-Type: application/json
     "model_key": "crumb_-_nano-mistral"
 }
 
+### GET session model
+GET http://{{hostname}}/api/session/{{create_debug_session.response.body.session_id}}/models
+Accept: application/json
+Content-Type: application/json
 
 ### Request SSE
 GET http://{{hostname}}/api/session/{{create_debug_session.response.body.session_id}}/chat/stream
 Accept: application/json
 
+### Send Message
+POST http://{{hostname}}/api/session/{{create_debug_session.response.body.session_id}}/chat
+Accept: application/json
+Content-Type: application/json
+
+{
+    "message": "Hello!"
+}

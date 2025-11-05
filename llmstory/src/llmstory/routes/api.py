@@ -44,7 +44,7 @@ def unload_model(model_key: str):
         return jsonify({"message": f"Model {model_key} unloaded successfully"})
 
 @api_bp.route("/models/", methods=['PUT'])
-def load_model(model_key: str):
+def load_model():
     data = request.get_json()
     model_key = data['model_key']
 
@@ -85,12 +85,52 @@ def use_model(session_id: str):
         "model_key": model_key
     })
 
+@api_bp.route("/session/<string:session_id>/models", methods=['GET'])
+def get_session_model(session_id: str):
+    session = get_session(session_id)
+
+    with valid_lm_client() as client:
+        loaded_models = [ModelInfo(m).key for m in client.llm.list_loaded()]
+
+        return jsonify({
+            "session_id": session_id,
+            "model_key": session.model_key,
+            "model_status": "loaded" if session.model_key in loaded_models else "inactive"
+        })
+    
+    return jsonify({
+        "session_id": session_id,
+        "error": "NO_LM_CLIENT"
+    })
+
 @api_bp.route("/session/debug", methods=['POST'])
 def create_session_debug():
     session_id = str(uuid.uuid4())
     response = make_response(jsonify({"session_id": session_id, "created": True}))
     response.set_cookie('session_id', session_id, httponly=True, secure=False)
     return response
+
+@api_bp.route("/session/<string:session_id>/chat", methods=['POST'])
+def send_message(session_id: str):
+    session = get_session(session_id)
+
+    data = request.get_json()
+    message = data.get('message', '')
+    
+    with valid_lm_client() as client:
+        model = client.llm.model(session.model_key)
+        response = model.respond(message)
+        
+        return jsonify({
+            "session_id": session_id,
+            "message": message,
+            "response": response.content
+        })
+    
+    return jsonify({
+        "session_id": session_id,
+        "error": "Something went wrong"
+    })
 
 
 @api_bp.route("/session/<string:session_id>/chat/stream", methods=['GET'])
