@@ -4,7 +4,7 @@ Handles all API endpoints for data exchange.
 """
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Generator, Sequence
 from flask import Blueprint, Response, json, jsonify, request, current_app
 import humanize
 import lmstudio as lms
@@ -26,6 +26,31 @@ def valid_lm_client():
         raise ConnectionError("Could not connect to LMStudio API")
 
     with lms.Client(SERVER_API_HOST) as client:
+        yield client
+
+@contextmanager
+def valid_async_lm_client() -> Generator[lms.AsyncClient, None, None]:
+    """
+    Create and yield a validated asynchronous LMStudio client.
+    This function validates the connection to the LMStudio API server and yields
+    an AsyncClient instance that can be used for making API calls. The client
+    is automatically managed within a context manager to ensure proper cleanup.
+    Yields:
+        lms.AsyncClient: A connected and validated asynchronous LMStudio client.
+    Raises:
+        ConnectionError: If unable to connect to the LMStudio API server.
+    Note:
+        The API host is configured via the 'LMSTUDIO_API_HOST' configuration
+        setting, defaulting to 'localhost:1234' if not specified.
+    """
+    config = current_app.config
+    SERVER_API_HOST = config.get('LMSTUDIO_API_HOST', 'localhost:1234')
+
+    is_connected = lms.AsyncClient.is_valid_api_host(SERVER_API_HOST)
+    if not is_connected:
+        raise ConnectionError("Could not connect to LMStudio API")
+
+    with lms.AsyncClient(SERVER_API_HOST) as client:
         yield client
         
 
@@ -134,19 +159,21 @@ def send_message(session_id: str):
 
 
 @api_bp.route("/session/<string:session_id>/chat/stream", methods=['GET'])
-def stream_chat(session_id: str):
-    def generate_sse_message():
+async def stream_chat(session_id: str):
+    async def generate_sse_message():
         try:
-            # session = get_session(session_id)
+            session = get_session(session_id)
 
-            for i in range(1, 10):
-                yield json.dumps({
-                    "data": {
-                        "event": "response",
-                        "text": f"Message = {i}"
-                    }
-                })
-                time.sleep(1)
+            async with valid_async_lm_client() as client:
+                model = await client.llm.model(session.model_key)
+
+                async for fragment in model.respond_stream(message):
+                    yield json.dumps({
+                        "data": {
+                            "event": "response",
+                            "text": f"Message = {i}"
+                        }
+                    })
         except:
             yield json.dumps({
                 "data": {
