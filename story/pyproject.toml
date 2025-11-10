@@ -1,19 +1,20 @@
 [project]
-name = "llmstory"
+name = "story"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
+authors = [
+    { name = "gjc18", email = "gregjc@protonmail.com" }
+]
 requires-python = ">=3.14"
 dependencies = [
-    "flask[async]>=3.1.2",
-    "flask-socketio>=5.5.1",
-    "humanize>=4.14.0",
+    "argparse>=1.4.0",
     "lmstudio>=1.5.0",
-    "python-dotenv>=1.0.0",
+    "python-dotenv>=1.2.1",
 ]
 
 [project.scripts]
-llmstory = "llmstory:main"
+story = "story.cli:cli_main"
 
 [build-system]
 requires = ["uv_build>=0.9.6,<0.10.0"]

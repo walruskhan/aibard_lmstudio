@@ -10,7 +10,8 @@ import humanize
 import lmstudio as lms
 import uuid
 from flask import make_response
-from ..session import get_or_create_session, get_session
+from ..session import get_or_create_session, get_session, create_session
+from ..session.LLMSession import RoleType
 import time
 
 # Create a blueprint for API routes
@@ -130,31 +131,26 @@ def get_session_model(session_id: str):
 
 @api_bp.route("/session/debug", methods=['POST'])
 def create_session_debug():
-    session_id = str(uuid.uuid4())
-    response = make_response(jsonify({"session_id": session_id, "created": True}))
-    response.set_cookie('session_id', session_id, httponly=True, secure=False)
+    session = create_session()
+
+    response = make_response(jsonify({"session_id": session.session_key, "created": True}))
+    response.set_cookie('session_id', session.session_key, httponly=True, secure=False)
     return response
 
 @api_bp.route("/session/<string:session_id>/chat", methods=['POST'])
-def send_message(session_id: str):
+async def send_message(session_id: str):
     session = get_session(session_id)
 
     data = request.get_json()
     message = data.get('message', '')
-    
-    with valid_lm_client() as client:
-        model = client.llm.model(session.model_key)
-        response = model.respond(message)
-        
-        return jsonify({
-            "session_id": session_id,
-            "message": message,
-            "response": response.content
-        })
+
+    session.append(role=RoleType.USER, text=message)
+    text = await session.generate()
     
     return jsonify({
         "session_id": session_id,
-        "error": "Something went wrong"
+        "message": message,
+        "response": text
     })
 
 

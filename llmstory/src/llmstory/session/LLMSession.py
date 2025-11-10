@@ -1,8 +1,10 @@
 from contextlib import contextmanager
 from datetime import datetime
+import os
 import threading
 from lmstudio import LLM, Chat
 from enum import Enum
+import lmstudio as lms
 
 class RoleType(Enum):
     ASSISTANT = "assistant"
@@ -19,6 +21,8 @@ class LLMSession():
     chat: Chat = Chat()
     model_key: str = None
     llm: LLM = None
+    prediction_stream = None
+    prediction_cancelled = False
 
     def __init__(self, session_key: str):
         self.session_key = session_key
@@ -60,12 +64,41 @@ class LLMSession():
         """Summarize chat and create a smaller context"""
         pass
 
-    def append_response(self, role: RoleType, text: str):
+    def append(self, role: RoleType, text: str):
         self.chat.add_entry(role.value, text)
 
-    def generate_message(self):
-        self.llm.complete_stream()
-        
+    async def generate(self):
+        with self.try_lock():
+            SERVER_API_HOST = os.getenv('LMSTUDIO_API_HOST', 'http://localhost:1234')
+            async with lms.AsyncClient(SERVER_API_HOST) as client:
+                model = await client.llm.model(self.model_key)
+                self.prediction_cancelled = False
+
+                text = ""
+                async for fragment in model.respond_stream(self.chat):
+                    text += fragment.content
+
+                return text
+        return None
+
+
+    def force_unlock(self):
+        if not self.lock.locked and self.lock_time is None:
+            return
+
+        try:
+            self.lock.release()
+            if self.prediction_stream is not None:
+                self.prediction_stream.cancel()
+                next(self.prediction_stream)
+
+            self.prediction_cancelled = True
+        except RuntimeError:
+            # Race: lock was released between check and release
+            pass
+        finally:
+            self.lock_time = None
+
 
     
 

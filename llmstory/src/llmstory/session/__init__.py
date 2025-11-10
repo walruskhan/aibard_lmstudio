@@ -1,3 +1,4 @@
+import uuid
 from .LLMSession import LLMSession
 from typing import Dict
 
@@ -17,8 +18,15 @@ def get_or_create_session(session_id: str):
 
     return sessions[session_id]
 
+def create_session() -> LLMSession:
+    session_id = str(uuid.uuid4())
+    session = LLMSession(session_id)
+    sessions[session_id] = session
+    return session
+    
+
 def get_session(session_id: str):
     if session_id not in sessions.keys():
-        raise f"session='{session_id}' does not exist"
+        raise ValueError(f"session='{session_id}' does not exist")
     
     return sessions[session_id]
